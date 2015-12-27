@@ -7,7 +7,7 @@ var data = [4, 8, 15, 16, 23, 42];
 
 var x = d3.scale.linear()
     .domain([0, d3.max(data)])
-    .range([0, 420]);
+    .range([0, 100]);
 
 var body = d3.select("body");
 var div = body.append("div")
@@ -15,7 +15,7 @@ var div = body.append("div")
     .selectAll("div")
         .data(data)
     .enter().append("div")
-        .style("width", (d) => x(d) * 10 + "px")
+        .style("height", (d) => x(d) + "px")
         .text((d) => d);
 
 
