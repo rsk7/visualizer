@@ -1,8 +1,7 @@
-.eq div,.chart div {
-    margin: 10px;
-    padding: 10px;
-    color: white;
-    background-color: blue;
+.eq div {
+    margin: 2px;
+    background-color: #98AFC7;
     display: inline-block;
     vertical-align: bottom;
+    width: 5px;
 }
