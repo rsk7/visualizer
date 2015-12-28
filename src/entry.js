@@ -64,12 +64,69 @@ var analyser = context.createAnalyser();
 gainNode.connect(analyser);
 analyser.connect(context.destination);
 
+// timer for drawing
+var timer = function(callback, interval) {
+    this.callback = callback;
+    this.interval = interval || 10;
+};
+
+timer.prototype.start = function startTimer() {
+    this.timer = setInterval(this.callback, this.interval);
+};
+
+timer.prototype.stop = function stopTimer() {
+    clearInterval(this.timer);
+    this.timer = null;
+};
+
+timer.prototype.toggle = function toggleTimer() {
+    if (this.timer) {
+        this.stop();
+    } else {
+        this.start();
+    }
+};
+
+var updateData = function(data) {
+    var x = d3.scale.linear()
+        .domain([0, d3.max(data)])
+        .range([0, 100]);
+
+    var selection = d3.select(".eq")
+        .selectAll("div")
+        .data(data)
+        .style("height", (d) => x(d) + "px")
+        .text((d) => d);
+
+    selection.enter()
+        .append("div");
+};
+
+
+var draw = function draw(analyserNode, barCount) {
+    var frequencyData = new Uint8Array(analyserNode.frequencyBinCount);
+    analyserNode.getByteFrequencyData(frequencyData);
+    var interval = Math.floor(frequencyData.length / barCount);
+    var barHeights = [];
+    for(let i = 0; i < barCount; i++) {
+        barHeights[i] = frequencyData[i * interval];
+    }
+    updateData(barHeights);
+};
+
+var BAR_COUNT = 60;
+
+var drawTimer = new timer(() => draw(analyser, BAR_COUNT));
+
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("click")
         .addEventListener("click", () => {
             gainNode.gain.value = gainNode.gain.value ? 0 : 1;
         });
+    document.getElementById("draw")
+        .addEventListener("click", () => drawTimer.toggle());
 });
+
 
 
 
