@@ -11,10 +11,9 @@ var BAR_COUNT = 60;
 var EqBars = new eqBars(".eq", dataProvider, BAR_COUNT);
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("click")
+    EqBars.toggle(); // start
+    document.getElementById("noise-play")
         .addEventListener("click", toggleSource);
-    document.getElementById("draw")
-        .addEventListener("click", () => EqBars.toggle());
 });
 
 

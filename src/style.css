@@ -1,7 +1,51 @@
+/* from http://codepen.io/niklausgerber/pen/niujk */
+html,body {
+  height:100%;
+  margin:0;
+}
+
+.content {
+  height:100%;
+  min-height:100%;
+}
+
+html>body .content {
+  height:auto;
+}
+/* end */
+
+.eq {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+}
+
 .eq div {
     margin: 2px;
     background-color: #98AFC7;
-    display: inline-block;
-    vertical-align: bottom;
     width: 5px;
+    min-height: 4px;
 }
+
+.play {
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-left: 12px solid #98AFC7;
+    border-bottom: 8px solid transparent;
+    border-right: 0px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#noise-play {
+    cursor: pointer;
+    color: cadetblue;
+    font-family: monospace;
+}
+
+#noise-play span {
+    vertical-align: sub;
+}
+
