@@ -47,20 +47,40 @@
 	"use strict";
 
 	__webpack_require__(1);
-	var toggleSource = __webpack_require__(5).toggleSource;
-	var dataProvider = __webpack_require__(5).dataProvider;
-	var eqBars = __webpack_require__(6).Bars;
-	var d3 = __webpack_require__(8);
+	var Noise = __webpack_require__(5).Noise;
+	var Mic = __webpack_require__(6).Mic;
+	var EqBars = __webpack_require__(7).Bars;
+	var d3 = __webpack_require__(9);
 
-	var h = __webpack_require__(9);
+	var h = __webpack_require__(10);
 	window.h = h;
 
 	var BAR_COUNT = 60;
-	var EqBars = new eqBars(".eq", dataProvider, BAR_COUNT);
+
+	var mic = new Mic();
+	var noise = new Noise();
+	var eqBars = new EqBars(".eq", BAR_COUNT);
+
+	var micToggle = function micToggle() {
+	    eqBars.setDataProvider(function () {
+	        return mic.dataProvider();
+	    });
+	    mic.toggle();
+	};
+
+	var noiseToggle = function noiseToggle() {
+	    eqBars.setDataProvider(function () {
+	        return noise.dataProvider();
+	    });
+	    noise.toggle();
+	};
 
 	document.addEventListener("DOMContentLoaded", function () {
-	    EqBars.toggle(); // start
-	    document.getElementById("noise-play").addEventListener("click", toggleSource);
+	    eqBars.draw();
+
+	    document.getElementById("noise-play").addEventListener("click", noiseToggle);
+
+	    document.getElementById("listen").addEventListener("click", micToggle);
 	});
 
 /***/ },
@@ -98,7 +118,7 @@
 
 
 	// module
-	exports.push([module.id, "/* from http://codepen.io/niklausgerber/pen/niujk */\nhtml,body {\n  height:100%;\n  margin:0;\n}\n\n.content {\n  height:100%;\n  min-height:100%;\n}\n\nhtml>body .content {\n  height:auto;\n}\n/* end */\n\n.eq {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    min-height: 100%;\n}\n\n.eq div {\n    margin: 2px;\n    background-color: #98AFC7;\n    width: 5px;\n    min-height: 4px;\n}\n\n.play {\n    width: 0;\n    height: 0;\n    border-top: 8px solid transparent;\n    border-left: 12px solid #98AFC7;\n    border-bottom: 8px solid transparent;\n    border-right: 0px;\n    background-color: transparent;\n    cursor: pointer;\n}\n\n#noise-play {\n    cursor: pointer;\n    color: cadetblue;\n    font-family: monospace;\n}\n\n#noise-play span {\n    vertical-align: sub;\n}\n\n", ""]);
+	exports.push([module.id, "/* from http://codepen.io/niklausgerber/pen/niujk */\nhtml,body {\n  height:100%;\n  margin:0;\n}\n\n.content {\n  height:100%;\n  min-height:100%;\n}\n\nhtml>body .content {\n  height:auto;\n}\n/* end */\n\n.eq {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    min-height: 100%;\n}\n\n.eq div.bar {\n    margin: 2px;\n    background-color: #98AFC7;\n    width: 5px;\n    min-height: 4px;\n}\n\n.play {\n    width: 0;\n    height: 0;\n    border-top: 8px solid transparent;\n    border-left: 12px solid #98AFC7;\n    border-bottom: 8px solid transparent;\n    border-right: 0px;\n    background-color: transparent;\n    cursor: pointer;\n}\n\n#noise-play span {\n    vertical-align: sub;\n}\n\n.eq div.options {\n    width: auto;\n    background-color: transparent;\n    cursor: pointer;\n    color: cadetblue;\n    font-family: monospace;\n}\n\n.eq div.options > div {\n    margin: 10px;\n}\n\n/* need to find an icon */\n#listen > button {\n    display: none;\n}\n\n", ""]);
 
 	// exports
 
@@ -419,11 +439,14 @@
 
 	"use strict";
 
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.toggleSource = toggleSource;
-	exports.dataProvider = dataProvider;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	// from:
 	// https://developer.tizen.org/community/tip-tech/advanced-web-audio-api-usage
 	var context = new (window.AudioContext || window.webkitAudioContext)();
@@ -434,37 +457,138 @@
 	    }
 	};
 
-	var bufferSource = context.createBufferSource();
-	var buffer = context.createBuffer(2, 44100, 44100);
-	var leftChannelData = buffer.getChannelData(0);
-	var rightChannelData = buffer.getChannelData(1);
-	populateBufferSource(leftChannelData);
-	populateBufferSource(rightChannelData);
-	bufferSource.loop = true;
-	bufferSource.buffer = buffer;
-	bufferSource.start();
+	var createNoise = function createNoise() {
+	    var bufferSource = context.createBufferSource();
+	    var buffer = context.createBuffer(2, 44100, 44100);
+	    var leftChannelData = buffer.getChannelData(0);
+	    var rightChannelData = buffer.getChannelData(1);
+	    populateBufferSource(leftChannelData);
+	    populateBufferSource(rightChannelData);
+	    bufferSource.loop = true;
+	    bufferSource.buffer = buffer;
+	    bufferSource.start();
+	    var gainNode = context.createGain();
+	    gainNode.gain.value = 0;
+	    bufferSource.connect(gainNode);
+	    var analyser = context.createAnalyser();
+	    gainNode.connect(analyser);
+	    analyser.connect(context.destination);
+	    return { gainNode: gainNode, analyser: analyser };
+	};
 
-	var gainNode = context.createGain();
-	gainNode.gain.value = 0;
+	var Noise = exports.Noise = (function () {
+	    function Noise() {
+	        _classCallCheck(this, Noise);
 
-	bufferSource.connect(gainNode);
+	        var webaudioNodes = createNoise();
+	        this.gainNode = webaudioNodes.gainNode;
+	        this.analyser = webaudioNodes.analyser;
+	    }
 
-	var analyser = context.createAnalyser();
-	gainNode.connect(analyser);
-	analyser.connect(context.destination);
+	    _createClass(Noise, [{
+	        key: "toggle",
+	        value: function toggle() {
+	            this.gainNode.gain.value = this.gainNode.gain.value ? 0 : 0.5;
+	        }
+	    }, {
+	        key: "dataProvider",
+	        value: function dataProvider() {
+	            var frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+	            this.analyser.getByteFrequencyData(frequencyData);
+	            return frequencyData;
+	        }
+	    }]);
 
-	function toggleSource() {
-	    gainNode.gain.value = gainNode.gain.value ? 0 : 0.05;
-	}
-
-	function dataProvider() {
-	    var frequencyData = new Uint8Array(analyser.frequencyBinCount);
-	    analyser.getByteFrequencyData(frequencyData);
-	    return frequencyData;
-	}
+	    return Noise;
+	})();
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+	var context = new (window.AudioContext || window.webkitAudioContext)();
+
+	var processInput = function processInput(stream) {
+	    var micIn = context.createMediaStreamSource(stream);
+	    var gainNode = context.createGain();
+	    gainNode.gain.value = 1;
+	    micIn.connect(gainNode);
+	    var analyser = context.createAnalyser();
+	    gainNode.connect(analyser);
+	    // not connecting to destination
+	    return analyser;
+	};
+
+	var Mic = exports.Mic = (function () {
+	    function Mic() {
+	        _classCallCheck(this, Mic);
+	    }
+
+	    _createClass(Mic, [{
+	        key: "listen",
+	        value: function listen() {
+	            var _this = this;
+
+	            if (navigator.getUserMedia) {
+	                navigator.getUserMedia({ audio: true }, function (stream) {
+	                    return _this.setup(stream);
+	                }, function (error) {
+	                    return console.log("getUserMedia failed");
+	                });
+	            }
+	        }
+	    }, {
+	        key: "setup",
+	        value: function setup(stream) {
+	            this.stream = stream;
+	            this.analyser = processInput(this.stream);
+	        }
+	    }, {
+	        key: "dataProvider",
+	        value: function dataProvider() {
+	            if (!this.analyser) return new Uint8Array();
+	            var frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+	            this.analyser.getByteFrequencyData(frequencyData);
+	            return frequencyData;
+	        }
+	    }, {
+	        key: "stop",
+	        value: function stop() {
+	            if (this.stream) {
+	                // this.stream.stop();
+	                this.stream.getAudioTracks()[0].stop();
+	                // clear
+	                this.stream = null;
+	            }
+	        }
+	    }, {
+	        key: "toggle",
+	        value: function toggle() {
+	            if (this.stream) {
+	                this.stop();
+	            } else {
+	                this.listen();
+	            }
+	        }
+	    }]);
+
+	    return Mic;
+	})();
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -476,25 +600,33 @@
 	});
 	exports.Bars = undefined;
 
-	var _timer = __webpack_require__(7);
+	var _timer = __webpack_require__(8);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	/* audio visualizer bars that update using d3*/
-	var d3 = __webpack_require__(8);
+	var d3 = __webpack_require__(9);
 
 	var d3update = function d3update(selector, data) {
 	    var x = d3.scale.linear().domain([0, d3.max(data)]).range([0, 100]);
-	    var selection = d3.select(selector).selectAll("div").data(data).style("height", function (d) {
+	    var selection = d3.select(selector).selectAll("div.bar").data(data).style("height", function (d) {
 	        return x(d) + "px";
 	    });
-	    selection.enter().append("div");
+	    selection.enter().append("div").attr("class", "bar");
+	};
+
+	var barHeights = function barHeights(data, interval, barCount) {
+	    var barHeightData = new Array(barCount);
+	    for (var i = 0; i < barCount; i++) {
+	        barHeightData[i] = data[i * interval];
+	    }
+	    return barHeightData;
 	};
 
 	var Bars = exports.Bars = (function () {
 	    /* d3 selector query */
 
-	    function Bars(selector, dataProvider, barCount) {
+	    function Bars(selector, barCount, dataProvider) {
 	        _classCallCheck(this, Bars);
 
 	        this.selector = selector;
@@ -503,31 +635,35 @@
 	    }
 
 	    _createClass(Bars, [{
-	        key: "barHeights",
-	        value: function barHeights(data, interval) {
-	            var barHeightData = new Array(this.barCount);
-	            for (var i = 0; i < this.barCount; i++) {
-	                barHeightData[i] = data[i * interval];
-	            }
-	            return barHeightData;
+	        key: "draw",
+	        value: function draw() {
+	            d3update(this.selector, barHeights([], 1, this.barCount));
+	        }
+	    }, {
+	        key: "setDataProvider",
+	        value: function setDataProvider(dataProvider) {
+	            var _this = this;
+
+	            this.dataProvider = dataProvider;
+	            this.drawTimer = this.drawTimer || new _timer.Timer(function () {
+	                return _this.update();
+	            });
+	            this.drawTimer.start();
 	        }
 	    }, {
 	        key: "update",
 	        value: function update() {
 	            var data = this.dataProvider();
 	            var interval = Math.floor(data.length / this.barCount);
-	            var barHeights = this.barHeights(data, interval);
-	            d3update(this.selector, barHeights);
+	            var barHeightData = barHeights(data, interval, this.barCount);
+	            d3update(this.selector, barHeightData);
 	        }
 	    }, {
-	        key: "toggle",
-	        value: function toggle() {
-	            var _this = this;
-
-	            this.drawTimer = this.drawTimer || new _timer.Timer(function () {
-	                return _this.update();
-	            });
-	            this.drawTimer.toggle();
+	        key: "stop",
+	        value: function stop() {
+	            if (this.drawTimer) {
+	                this.drawTimer.stop();
+	            }
 	        }
 	    }]);
 
@@ -535,7 +671,7 @@
 	})();
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -583,7 +719,7 @@
 	})();
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
@@ -10141,12 +10277,12 @@
 	}();
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// HARMONY
-	var _ = __webpack_require__(10);
-	var m = __webpack_require__(11);
+	var _ = __webpack_require__(11);
+	var m = __webpack_require__(12);
 
 	/*
 	// split DSL for note names
@@ -10207,7 +10343,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -11761,13 +11897,13 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(10);
-	var Sound = __webpack_require__(12);
-	var config = __webpack_require__(13);
-	var NoteDictionary = __webpack_require__(14);
+	var _ = __webpack_require__(11);
+	var Sound = __webpack_require__(13);
+	var config = __webpack_require__(14);
+	var NoteDictionary = __webpack_require__(15);
 
 	var activeNotes = {};
 	var defaultOctave = 4;
@@ -11865,7 +12001,7 @@
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	var soundContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -11950,7 +12086,7 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -11965,10 +12101,10 @@
 	};
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(10);
+	var _ = __webpack_require__(11);
 
 	var data = [
 	    {'name' : 'C' , 'octave' :   0, 'frequency' :    16.351  },
