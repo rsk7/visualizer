@@ -7,39 +7,51 @@ var d3update = function(selector, data) {
         .domain([0, d3.max(data)])
         .range([0, 100]);
     let selection = d3.select(selector)
-        .selectAll("div")
+        .selectAll("div.bar")
         .data(data)
         .style("height", (d) => x(d) + "px");
     selection.enter()
-        .append("div");
+        .append("div")
+            .attr("class", "bar");
 }
+
+var barHeights = function barHeights(data, interval, barCount) {
+    let barHeightData = new Array(barCount);
+    for(let i = 0; i < barCount; i++) {
+        barHeightData[i] = data[i * interval];
+    }
+    return barHeightData;
+};
 
 export class Bars {
     /* d3 selector query */
-    constructor(selector, dataProvider, barCount) {
+    constructor(selector, barCount, dataProvider) {
         this.selector = selector;
         this.dataProvider = dataProvider;
         this.barCount = barCount;
     }
 
-    barHeights(data, interval) {
-        let barHeightData = new Array(this.barCount);
-        for(let i = 0; i < this.barCount; i++) {
-            barHeightData[i] = data[i * interval];
-        }
-        return barHeightData;
+    draw() {
+        d3update(this.selector, barHeights([], 1, this.barCount));
+    }
+
+    setDataProvider(dataProvider) {
+        this.dataProvider = dataProvider;
+        this.drawTimer = this.drawTimer || new Timer(() => this.update());
+        this.drawTimer.start();
     }
 
     update() {
         let data = this.dataProvider();
         let interval = Math.floor(data.length / this.barCount);
-        let barHeights = this.barHeights(data, interval);
-        d3update(this.selector, barHeights);
+        let barHeightData = barHeights(data, interval, this.barCount);
+        d3update(this.selector, barHeightData);
     }
 
-    toggle() {
-        this.drawTimer = this.drawTimer || new Timer(() => this.update());
-        this.drawTimer.toggle();
+    stop() {
+        if (this.drawTimer) {
+            this.drawTimer.stop();
+        }
     }
 
 }
