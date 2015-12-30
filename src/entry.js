@@ -1,19 +1,36 @@
 require("./style.css");
-var toggleSource = require("./sound_data.js").toggleSource;
-var dataProvider = require("./sound_data.js").dataProvider;
-var eqBars = require("./bars.js").Bars;
+var Noise = require("./noise.js").Noise;
+var Mic = require("./microphone.js").Mic;
+var EqBars = require("./bars.js").Bars;
 var d3 = require("d3");
 
 var h = require("h-audio");
 window.h = h;
 
 var BAR_COUNT = 60;
-var EqBars = new eqBars(".eq", dataProvider, BAR_COUNT);
+
+var mic = new Mic();
+var noise = new Noise();
+var eqBars = new EqBars(".eq", BAR_COUNT);
+
+var micToggle = function micToggle() {
+    eqBars.setDataProvider(() => mic.dataProvider());
+    mic.toggle();
+};
+
+var noiseToggle = function noiseToggle() {
+    eqBars.setDataProvider(() => noise.dataProvider());
+    noise.toggle();
+};
 
 document.addEventListener("DOMContentLoaded", () => {
-    EqBars.toggle(); // start
+    eqBars.draw();
+
     document.getElementById("noise-play")
-        .addEventListener("click", toggleSource);
+        .addEventListener("click", noiseToggle);
+
+    document.getElementById("listen")
+        .addEventListener("click", micToggle);
 });
 
 

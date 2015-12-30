@@ -21,7 +21,7 @@ html>body .content {
     min-height: 100%;
 }
 
-.eq div {
+.eq div.bar {
     margin: 2px;
     background-color: #98AFC7;
     width: 5px;
@@ -39,13 +39,24 @@ html>body .content {
     cursor: pointer;
 }
 
-#noise-play {
+#noise-play span {
+    vertical-align: sub;
+}
+
+.eq div.options {
+    width: auto;
+    background-color: transparent;
     cursor: pointer;
     color: cadetblue;
     font-family: monospace;
 }
 
-#noise-play span {
-    vertical-align: sub;
+.eq div.options > div {
+    margin: 10px;
+}
+
+/* need to find an icon */
+#listen > button {
+    display: none;
 }
 
