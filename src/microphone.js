@@ -16,13 +16,15 @@ var processInput = function processInput(stream) {
     return analyser;
 };
 
+var msg = "getUserMedia failed. chrome requires this page to be on https. try forcing https:// on the url.";
+
 export class Mic {
     listen() {
         if (navigator.getUserMedia) {
             navigator.getUserMedia(
                     { audio: true },
                     (stream) => this.setup(stream),
-                    (error) => console.log("getUserMedia failed"));
+                    (error) => alert(msg));
         }
     }
 
