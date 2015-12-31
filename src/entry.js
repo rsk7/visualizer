@@ -23,6 +23,19 @@ var noiseToggle = function noiseToggle() {
     noise.toggle();
 };
 
+var tilted = false;
+var tiltToggle = function tiltToggle() {
+    var eqContainer = document.getElementById("eq-container");
+    if (!tilted) {
+        eqContainer.className = eqContainer.className.replace("tilt", "");
+        eqContainer.className += " tilt";
+        tilted = true;
+    } else {
+        tilted = false;
+        eqContainer.className = eqContainer.className.replace("tilt", "");
+    }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     eqBars.draw();
 
@@ -31,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("listen")
         .addEventListener("click", micToggle);
+
+    document.getElementById("tilt")
+        .addEventListener("click", tiltToggle);
 });
 
 
