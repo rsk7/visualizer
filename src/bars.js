@@ -41,6 +41,10 @@ export class Bars {
         this.drawTimer.start();
     }
 
+    setBarCount(count) {
+        this.barCount = count;
+    }
+
     update() {
         let data = this.dataProvider();
         let interval = Math.floor(data.length / this.barCount);
