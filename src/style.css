@@ -28,6 +28,14 @@ html>body .content {
     min-height: 4px;
 }
 
+.eq.tilt div.bar:nth-child(even) {
+    transform: rotate(-45deg);
+}
+
+.eq.tilt div.bar:nth-child(odd) {
+    transform: rotate(45deg);
+}
+
 .play {
     width: 0;
     height: 0;
@@ -57,6 +65,10 @@ html>body .content {
 
 /* need to find an icon */
 #listen > button {
+    display: none;
+}
+
+#tilt > button {
     display: none;
 }
 
