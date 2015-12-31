@@ -23,6 +23,10 @@ var noiseToggle = function noiseToggle() {
     noise.toggle();
 };
 
+var hAudioToggle = function hAudioToggle() {
+    eqBars.setDataProvider(require("./h-audio-data-provider").dataProvider);
+};
+
 var tilted = false;
 var tiltToggle = function tiltToggle() {
     var eqContainer = document.getElementById("eq-container");
@@ -47,6 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("tilt")
         .addEventListener("click", tiltToggle);
+
+    document.getElementById("h-audio")
+        .addEventListener("click", hAudioToggle);
 });
 
 

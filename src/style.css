@@ -72,3 +72,7 @@ html>body .content {
     display: none;
 }
 
+#h-audio > button {
+    display: none;
+}
+
