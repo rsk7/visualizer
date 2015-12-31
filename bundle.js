@@ -75,12 +75,33 @@
 	    noise.toggle();
 	};
 
+	var hAudioToggle = function hAudioToggle() {
+	    eqBars.setDataProvider(__webpack_require__(16).dataProvider);
+	};
+
+	var tilted = false;
+	var tiltToggle = function tiltToggle() {
+	    var eqContainer = document.getElementById("eq-container");
+	    if (!tilted) {
+	        eqContainer.className = eqContainer.className.replace("tilt", "");
+	        eqContainer.className += " tilt";
+	        tilted = true;
+	    } else {
+	        tilted = false;
+	        eqContainer.className = eqContainer.className.replace("tilt", "");
+	    }
+	};
+
 	document.addEventListener("DOMContentLoaded", function () {
 	    eqBars.draw();
 
 	    document.getElementById("noise-play").addEventListener("click", noiseToggle);
 
 	    document.getElementById("listen").addEventListener("click", micToggle);
+
+	    document.getElementById("tilt").addEventListener("click", tiltToggle);
+
+	    document.getElementById("h-audio").addEventListener("click", hAudioToggle);
 	});
 
 /***/ },
@@ -118,7 +139,7 @@
 
 
 	// module
-	exports.push([module.id, "/* from http://codepen.io/niklausgerber/pen/niujk */\nhtml,body {\n  height:100%;\n  margin:0;\n}\n\n.content {\n  height:100%;\n  min-height:100%;\n}\n\nhtml>body .content {\n  height:auto;\n}\n/* end */\n\n.eq {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    min-height: 100%;\n}\n\n.eq div.bar {\n    margin: 2px;\n    background-color: #98AFC7;\n    width: 5px;\n    min-height: 4px;\n}\n\n.play {\n    width: 0;\n    height: 0;\n    border-top: 8px solid transparent;\n    border-left: 12px solid #98AFC7;\n    border-bottom: 8px solid transparent;\n    border-right: 0px;\n    background-color: transparent;\n    cursor: pointer;\n}\n\n#noise-play span {\n    vertical-align: sub;\n}\n\n.eq div.options {\n    width: auto;\n    background-color: transparent;\n    cursor: pointer;\n    color: cadetblue;\n    font-family: monospace;\n}\n\n.eq div.options > div {\n    margin: 10px;\n}\n\n/* need to find an icon */\n#listen > button {\n    display: none;\n}\n\n", ""]);
+	exports.push([module.id, "/* from http://codepen.io/niklausgerber/pen/niujk */\nhtml,body {\n  height:100%;\n  margin:0;\n}\n\n.content {\n  height:100%;\n  min-height:100%;\n}\n\nhtml>body .content {\n  height:auto;\n}\n/* end */\n\n.eq {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    min-height: 100%;\n}\n\n.eq div.bar {\n    margin: 2px;\n    background-color: #98AFC7;\n    width: 5px;\n    min-height: 4px;\n}\n\n.eq.tilt div.bar:nth-child(even) {\n    transform: rotate(-45deg);\n}\n\n.eq.tilt div.bar:nth-child(odd) {\n    transform: rotate(45deg);\n}\n\n.play {\n    width: 0;\n    height: 0;\n    border-top: 8px solid transparent;\n    border-left: 12px solid #98AFC7;\n    border-bottom: 8px solid transparent;\n    border-right: 0px;\n    background-color: transparent;\n    cursor: pointer;\n}\n\n#noise-play span {\n    vertical-align: sub;\n}\n\n.eq div.options {\n    width: auto;\n    background-color: transparent;\n    cursor: pointer;\n    color: cadetblue;\n    font-family: monospace;\n}\n\n.eq div.options > div {\n    margin: 10px;\n}\n\n/* need to find an icon */\n#listen > button {\n    display: none;\n}\n\n#tilt > button {\n    display: none;\n}\n\n#h-audio > button {\n    display: none;\n}\n\n", ""]);
 
 	// exports
 
@@ -651,6 +672,11 @@
 	                return _this.update();
 	            });
 	            this.drawTimer.start();
+	        }
+	    }, {
+	        key: "setBarCount",
+	        value: function setBarCount(count) {
+	            this.barCount = count;
 	        }
 	    }, {
 	        key: "update",
@@ -10285,6 +10311,7 @@
 	// HARMONY
 	var _ = __webpack_require__(11);
 	var m = __webpack_require__(12);
+	var s = __webpack_require__(13);
 
 	/*
 	// split DSL for note names
@@ -10333,6 +10360,7 @@
 	module.exports = {
 	  play: play,
 	  stop: stop,
+	  analyser: s.analyser,
 	  configure: configure,
 	  configuration: m.config,
 	  activeNotes: m.activeNotes,
@@ -11967,7 +11995,7 @@
 
 	/*
 	// remember the note we're about to play
-	// configure the sound object to play 
+	// configure the sound object to play
 	// play sound
 	*/
 	var playNote = function(noteData) {
@@ -11981,7 +12009,7 @@
 	var stopNote = function(activeNote) {
 	  if (activeNote) {
 	    activeNote.note.stop();
-	    activeNotes[activeNote.noteId] = null;
+	    delete activeNotes[activeNote.noteId];
 	  }
 	};
 
@@ -12008,6 +12036,9 @@
 
 	var soundContext = new (window.AudioContext || window.webkitAudioContext)();
 
+	var analyser = soundContext.createAnalyser();
+	analyser.connect(soundContext.destination);
+
 	var sound = function(){
 	    this.attackTime = 0.75;
 	    this.releaseTime = 0.75;
@@ -12017,7 +12048,7 @@
 	    this.vca.gain.value = 0;
 	    this.vco.connect(this.vca);
 	    this.vco.start(0);
-	    this.vca.connect(soundContext.destination);
+	    this.vca.connect(analyser);
 	    this.on = false;
 	};
 
@@ -12078,10 +12109,12 @@
 	sound.prototype.stop = function(){
 	    this.on = false;
 	    this.envelopeStop(function() {
-	        this.vco.disconnect();
-	        this.vca.disconnect(); 
+	        // this.vco.disconnect();
+	        // this.vca.disconnect();
 	    }.bind(this));
 	};
+
+	sound.analyser = analyser;
 
 	module.exports = sound;
 
@@ -12252,6 +12285,25 @@
 
 	module.exports = api;
 
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.dataProvider = dataProvider;
+	var h = __webpack_require__(10);
+
+	// gotta put this data export thing in one place
+	function dataProvider() {
+	    var frequencyData = new Uint8Array(h.analyser.frequencyBinCount);
+	    h.analyser.getByteFrequencyData(frequencyData);
+	    return frequencyData;
+	};
 
 /***/ }
 /******/ ]);
