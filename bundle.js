@@ -75,12 +75,27 @@
 	    noise.toggle();
 	};
 
+	var tilted = false;
+	var tiltToggle = function tiltToggle() {
+	    var eqContainer = document.getElementById("eq-container");
+	    if (!tilted) {
+	        eqContainer.className = eqContainer.className.replace("tilt", "");
+	        eqContainer.className += " tilt";
+	        tilted = true;
+	    } else {
+	        tilted = false;
+	        eqContainer.className = eqContainer.className.replace("tilt", "");
+	    }
+	};
+
 	document.addEventListener("DOMContentLoaded", function () {
 	    eqBars.draw();
 
 	    document.getElementById("noise-play").addEventListener("click", noiseToggle);
 
 	    document.getElementById("listen").addEventListener("click", micToggle);
+
+	    document.getElementById("tilt").addEventListener("click", tiltToggle);
 	});
 
 /***/ },
@@ -118,7 +133,7 @@
 
 
 	// module
-	exports.push([module.id, "/* from http://codepen.io/niklausgerber/pen/niujk */\nhtml,body {\n  height:100%;\n  margin:0;\n}\n\n.content {\n  height:100%;\n  min-height:100%;\n}\n\nhtml>body .content {\n  height:auto;\n}\n/* end */\n\n.eq {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    min-height: 100%;\n}\n\n.eq div.bar {\n    margin: 2px;\n    background-color: #98AFC7;\n    width: 5px;\n    min-height: 4px;\n}\n\n.play {\n    width: 0;\n    height: 0;\n    border-top: 8px solid transparent;\n    border-left: 12px solid #98AFC7;\n    border-bottom: 8px solid transparent;\n    border-right: 0px;\n    background-color: transparent;\n    cursor: pointer;\n}\n\n#noise-play span {\n    vertical-align: sub;\n}\n\n.eq div.options {\n    width: auto;\n    background-color: transparent;\n    cursor: pointer;\n    color: cadetblue;\n    font-family: monospace;\n}\n\n.eq div.options > div {\n    margin: 10px;\n}\n\n/* need to find an icon */\n#listen > button {\n    display: none;\n}\n\n", ""]);
+	exports.push([module.id, "/* from http://codepen.io/niklausgerber/pen/niujk */\r\nhtml,body {\r\n  height:100%;\r\n  margin:0;\r\n}\r\n\r\n.content {\r\n  height:100%;\r\n  min-height:100%;\r\n}\r\n\r\nhtml>body .content {\r\n  height:auto;\r\n}\r\n/* end */\r\n\r\n.eq {\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    min-height: 100%;\r\n}\r\n\r\n.eq div.bar {\r\n    margin: 2px;\r\n    background-color: #98AFC7;\r\n    width: 5px;\r\n    min-height: 4px;\r\n}\r\n\r\n.eq.tilt div.bar:nth-child(even) {\r\n    transform: rotate(-45deg);\r\n}\r\n\r\n.eq.tilt div.bar:nth-child(odd) {\r\n    transform: rotate(45deg);\r\n}\r\n\r\n.play {\r\n    width: 0;\r\n    height: 0;\r\n    border-top: 8px solid transparent;\r\n    border-left: 12px solid #98AFC7;\r\n    border-bottom: 8px solid transparent;\r\n    border-right: 0px;\r\n    background-color: transparent;\r\n    cursor: pointer;\r\n}\r\n\r\n#noise-play span {\r\n    vertical-align: sub;\r\n}\r\n\r\n.eq div.options {\r\n    width: auto;\r\n    background-color: transparent;\r\n    cursor: pointer;\r\n    color: cadetblue;\r\n    font-family: monospace;\r\n}\r\n\r\n.eq div.options > div {\r\n    margin: 10px;\r\n}\r\n\r\n/* need to find an icon */\r\n#listen > button {\r\n    display: none;\r\n}\r\n\r\n#tilt > button {\r\n    display: none;\r\n}\r\n\r\n", ""]);
 
 	// exports
 
@@ -651,6 +666,11 @@
 	                return _this.update();
 	            });
 	            this.drawTimer.start();
+	        }
+	    }, {
+	        key: "setBarCount",
+	        value: function setBarCount(count) {
+	            this.barCount = count;
 	        }
 	    }, {
 	        key: "update",
