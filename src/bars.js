@@ -4,7 +4,7 @@ import {Timer as Timer} from './timer';
 
 var d3update = function(selector, data) {
     let x = d3.scale.linear()
-        .domain([0, d3.max(data)])
+        .domain([d3.min(data), d3.max(data)])
         .range([0, 100]);
     let selection = d3.select(selector)
         .selectAll("div.bar")
