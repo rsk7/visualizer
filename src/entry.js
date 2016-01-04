@@ -7,7 +7,7 @@ var d3 = require("d3");
 var h = require("h-audio");
 window.h = h;
 
-var BAR_COUNT = 60;
+var BAR_COUNT = 300;
 
 var mic = new Mic();
 var noise = new Noise();

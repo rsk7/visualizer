@@ -8,6 +8,7 @@ export function frequencyDataProvider() {
 }
 
 export function timeDataProvider() {
+    h.analyser.fftSize = 1024;
     var timeData = new Float32Array(h.analyser.fftSize);
     h.analyser.getFloatTimeDomainData(timeData);
     return timeData;

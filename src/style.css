@@ -22,10 +22,10 @@ html>body .content {
 }
 
 .eq div.bar {
-    margin: 2px;
+    margin: 0px;
     background-color: #98AFC7;
-    width: 5px;
-    min-height: 4px;
+    width: 2px;
+    min-height: 2px;
 }
 
 .eq.tilt div.bar:nth-child(even) {
