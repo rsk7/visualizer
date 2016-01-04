@@ -76,3 +76,7 @@ html>body .content {
     display: none;
 }
 
+#time > button {
+    display: none;
+}
+

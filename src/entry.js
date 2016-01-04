@@ -24,7 +24,11 @@ var noiseToggle = function noiseToggle() {
 };
 
 var hAudioToggle = function hAudioToggle() {
-    eqBars.setDataProvider(require("./h-audio-data-provider").dataProvider);
+    eqBars.setDataProvider(require("./h-audio-data-provider").frequencyDataProvider);
+};
+
+var hAudioTimeDomainToggle = function hAudioTimeDomainToggle() {
+    eqBars.setDataProvider(require("./h-audio-data-provider").timeDataProvider);
 };
 
 var tilted = false;
@@ -54,6 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("h-audio")
         .addEventListener("click", hAudioToggle);
+
+    document.getElementById("time")
+        .addEventListener("click", hAudioTimeDomainToggle);
+
 });
 
 
