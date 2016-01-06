@@ -1,16 +1,17 @@
+import {DataProvider} from "./data-provider";
+
 navigator.getUserMedia  = navigator.getUserMedia ||
                           navigator.webkitGetUserMedia ||
                           navigator.mozGetUserMedia ||
                           navigator.msGetUserMedia;
 
-var context = new (window.AudioContext || window.webkitAudioContext)();
-
 var processInput = function processInput(stream) {
-    var micIn = context.createMediaStreamSource(stream);
-    var gainNode = context.createGain();
+    let context = new (window.AudioContext || window.webkitAudioContext)();
+    let micIn = context.createMediaStreamSource(stream);
+    let gainNode = context.createGain();
     gainNode.gain.value = 1;
     micIn.connect(gainNode);
-    var analyser = context.createAnalyser();
+    let analyser = context.createAnalyser();
     gainNode.connect(analyser);
     // not connecting to destination
     return analyser;
@@ -18,7 +19,7 @@ var processInput = function processInput(stream) {
 
 var msg = "getUserMedia failed. chrome requires this page to be on https. try forcing https:// on the url.";
 
-export class Mic {
+export default class Mic {
     listen() {
         if (navigator.getUserMedia) {
             navigator.getUserMedia(
@@ -30,14 +31,15 @@ export class Mic {
 
     setup(stream) {
         this.stream = stream;
-        this.analyser = processInput(this.stream);
+        let analyser = processInput(this.stream);
+        this.dataProviderSource = new DataProvider(analyser);
     }
 
     dataProvider() {
-        if (!this.analyser) return new Uint8Array();
-        var frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
-        this.analyser.getByteFrequencyData(frequencyData);
-        return frequencyData;
+        return this.dataProviderSource || {
+            frequency: () => [],
+            time: () => []
+        };
     }
 
     stop() {

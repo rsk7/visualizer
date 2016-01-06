@@ -23,7 +23,7 @@ var barHeights = function barHeights(data, interval, barCount) {
     return barHeightData;
 };
 
-export class Bars {
+export default class Bars {
     /* d3 selector query */
     constructor(selector, barCount, dataProvider) {
         this.selector = selector;

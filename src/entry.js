@@ -1,11 +1,13 @@
 require("./style.css");
-var Noise = require("./noise.js").Noise;
-var Mic = require("./microphone.js").Mic;
-var EqBars = require("./bars.js").Bars;
-var d3 = require("d3");
 
-var h = require("h-audio");
-window.h = h;
+var d3 = require("d3");
+window.h = require("h-audio");
+
+import Noise from "./noise.js";
+import Mic from "./microphone.js";
+import oscDataProvider from "./oscillator";
+import hDataProvider from "./h-audio-data-provider";
+import EqBars from "./bars.js";
 
 var BAR_COUNT = 300;
 
@@ -13,23 +15,27 @@ var mic = new Mic();
 var noise = new Noise();
 var eqBars = new EqBars(".eq", BAR_COUNT);
 
-var micToggle = function micToggle() {
-    eqBars.setDataProvider(() => mic.dataProvider());
+function micToggle() {
     mic.toggle();
+    eqBars.setDataProvider(() => mic.dataProvider().frequency());
 };
 
-var noiseToggle = function noiseToggle() {
-    eqBars.setDataProvider(() => noise.dataProvider());
+function noiseToggle() {
+    eqBars.setDataProvider(() => noise.dataProvider().time());
     noise.toggle();
 };
 
-var hAudioToggle = function hAudioToggle() {
-    eqBars.setDataProvider(require("./h-audio-data-provider").frequencyDataProvider);
+function hAudioToggle() {
+    eqBars.setDataProvider(() => hDataProvider.frequencey());
 };
 
-var hAudioTimeDomainToggle = function hAudioTimeDomainToggle() {
-    eqBars.setDataProvider(require("./h-audio-data-provider").timeDataProvider);
+function hAudioTimeDomainToggle() {
+    eqBars.setDataProvider(() => hDataProvider.time());
 };
+
+function oscToggle() {
+    eqBars.setDataProvider(() => oscDataProvider.time());
+}
 
 var tilted = false;
 var tiltToggle = function tiltToggle() {
@@ -44,9 +50,6 @@ var tiltToggle = function tiltToggle() {
     }
 };
 
-function oscToggle() {
-    eqBars.setDataProvider(require("./oscillator").timeDataProvider);
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     eqBars.draw();
