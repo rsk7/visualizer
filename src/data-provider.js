@@ -1,4 +1,4 @@
-export class DataProvider {
+export default class DataProvider {
     constructor(analyser) {
         this.analyser = analyser;
     }

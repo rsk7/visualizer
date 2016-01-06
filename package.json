@@ -4,7 +4,7 @@
   "description": "displaying sound waves",
   "main": "index.js",
   "scripts": {
-      "server": "webpack-dev-server --progress --colors"
+    "start": "webpack-dev-server --progress --colors"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "webpack": "^1.12.9"
   },
   "babel": {
-      "presets": "es2015"
+    "presets": "es2015"
   },
   "dependencies": {
     "babel-preset-es2015": "^6.3.13",
@@ -30,6 +30,7 @@
     "d3": "^3.5.12",
     "h-audio": "^0.1.8",
     "json-loader": "^0.5.4",
+    "soundcloud": "^3.0.1",
     "style-loader": "^0.13.0"
   }
 }

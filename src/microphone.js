@@ -1,11 +1,11 @@
-import {DataProvider} from "./data-provider";
+import DataProvider from "./data-provider";
 
 navigator.getUserMedia  = navigator.getUserMedia ||
                           navigator.webkitGetUserMedia ||
                           navigator.mozGetUserMedia ||
                           navigator.msGetUserMedia;
 
-var processInput = function processInput(stream) {
+function processInput(stream) {
     let context = new (window.AudioContext || window.webkitAudioContext)();
     let micIn = context.createMediaStreamSource(stream);
     let gainNode = context.createGain();

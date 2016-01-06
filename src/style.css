@@ -57,6 +57,7 @@ html>body .content {
     cursor: pointer;
     color: cadetblue;
     font-family: monospace;
+    position: relative;
 }
 
 .eq div.options > div {
@@ -83,4 +84,21 @@ html>body .content {
 #osc > button {
     display: none;
 }
+
+#soundcloud > button {
+    display: none;
+}
+
+#sc-track {
+    position: absolute;
+    left: 90px;
+    top: -44px;
+}
+
+#sc-track input{
+    margin: 4px;
+    padding: 4px;
+    width: 279px;
+}
+
 

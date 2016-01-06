@@ -1,4 +1,4 @@
-import {DataProvider} from "./data-provider";
+import DataProvider from "./data-provider";
 
 function createSource() {
     let context = new (window.AudioContext || window.webkitAudioContext)();
