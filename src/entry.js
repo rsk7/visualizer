@@ -44,6 +44,10 @@ var tiltToggle = function tiltToggle() {
     }
 };
 
+function oscToggle() {
+    eqBars.setDataProvider(require("./oscillator").timeDataProvider);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     eqBars.draw();
 
@@ -62,6 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("time")
         .addEventListener("click", hAudioTimeDomainToggle);
 
+    document.getElementById("osc")
+        .addEventListener("click", oscToggle);
 });
 
 
