@@ -23,7 +23,6 @@ let dataProvider = noise.dataProvider();
 let domain = "frequency";
 eqBars.setDataProvider(() => dataProvider[domain]());
 
-
 // default to frequency domain
 function toggleDomain() {
     domain = domain === "frequency" ? "time" : "frequency";
@@ -56,7 +55,15 @@ function scToggle() {
 
 function tiltToggle() {
     $("#eq-container").toggleClass("tilt");
-};
+}
+
+function setupSoundcloud() {
+    sc.setup($("#audio-soundcloud")[0]);
+    let trackUrl = "https://soundcloud.com/rsk7/sounds-from-monday-evening";
+    $("#trackUrl").val(trackUrl);
+    sc.track(trackUrl);
+    $("#trackUrl").change(e => sc.track(e.target.value));
+}
 
 $(function() {
     $("#noise-play").click(noiseToggle);
@@ -68,12 +75,7 @@ $(function() {
     $("#soundcloud").click(scToggle);
 
     eqBars.draw();
-
-    sc.setup($("#audio-soundcloud")[0]);
-    let trackUrl = "https://soundcloud.com/rsk7/sounds-from-monday-evening";
-    $("#trackUrl").val(trackUrl);
-    sc.track(trackUrl);
-    $("#trackUrl").change(e => sc.track(e.target.value));
+    setupSoundcloud();
 });
 
 
