@@ -19,6 +19,7 @@
   "devDependencies": {
     "babel-core": "^6.3.26",
     "babel-loader": "^6.2.0",
+    "jquery": "^2.1.4",
     "webpack": "^1.12.9"
   },
   "babel": {
