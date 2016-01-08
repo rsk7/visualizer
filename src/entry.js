@@ -1,7 +1,7 @@
 require("./style.css");
 
-var d3 = require("d3");
-var $ = require("jquery");
+let d3 = require("d3");
+let $ = require("jquery");
 window.h = require("h-audio");
 
 import Noise from "./noise.js";
@@ -11,39 +11,47 @@ import oscDataProvider from "./oscillator";
 import SoundCloudSource from "./soundcloud.js";
 import hDataProvider from "./h-audio-data-provider";
 
-var BAR_COUNT = 300;
+let BAR_COUNT = 300;
 
-var mic = new Mic();
-var noise = new Noise();
-var sc = new SoundCloudSource();
-var eqBars = new EqBars(".eq", BAR_COUNT);
+let mic = new Mic();
+let noise = new Noise();
+let sc = new SoundCloudSource();
+let eqBars = new EqBars(".eq", BAR_COUNT);
+
+// default to noise
+let dataProvider = noise.dataProvider();
+let domain = "frequency";
+eqBars.setDataProvider(() => dataProvider[domain]());
+
+
+// default to frequency domain
+function toggleDomain() {
+    domain = domain === "frequency" ? "time" : "frequency";
+    eqBars.setDataProvider(() => dataProvider[domain]());
+}
 
 function micToggle() {
     mic.toggle();
-    eqBars.setDataProvider(() => mic.dataProvider().frequency());
+    dataProvider = mic.dataProvider();
 };
 
 function noiseToggle() {
-    eqBars.setDataProvider(() => noise.dataProvider().time());
     noise.toggle();
+    dataProvider = noise.dataProvider();
 };
 
 function hAudioToggle() {
-    eqBars.setDataProvider(() => hDataProvider.frequency());
-};
-
-function hAudioTimeDomainToggle() {
-    eqBars.setDataProvider(() => hDataProvider.time());
+    dataProvider = hDataProvider;
 };
 
 function oscToggle() {
-    eqBars.setDataProvider(() => oscDataProvider.time());
+    dataProvider = oscDataProvider;
 }
 
 function scToggle() {
     sc.toggle();
     $("#sc-track").toggle();
-    eqBars.setDataProvider(() => sc.dataProvider().frequency());
+    dataProvider = sc.dataProvider();
 }
 
 function tiltToggle() {
@@ -55,7 +63,7 @@ $(function() {
     $("#listen").click(micToggle);
     $("#tilt").click(tiltToggle);
     $("#h-audio").click(hAudioToggle);
-    $("#time").click(hAudioTimeDomainToggle);
+    $("#time").click(toggleDomain);
     $("#osc").click(oscToggle);
     $("#soundcloud").click(scToggle);
 
